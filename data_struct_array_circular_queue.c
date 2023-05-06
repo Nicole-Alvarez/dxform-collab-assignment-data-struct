@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
 #define MAX 5
 
 typedef struct data {
@@ -10,7 +12,6 @@ typedef struct data {
 int AskChoice();
 int InputSearch();
 void DisplayMenu();
-void InputAttendance(INFO attendance[], int *front, int *rear);
 void Enqueue(INFO attendance[], int *front, int *rear);
 void Dequeue(INFO attendance[], int *front);
 void Peek(INFO attendance[], int front);
@@ -22,13 +23,13 @@ int main() {
     int choice = 0;
     INFO attendance[MAX];
     int front = -1, rear = -1;
-    
+
     while (choice != 6) {
         DisplayMenu();
         choice = AskChoice();
         GoToChoice(choice, attendance, &front, &rear);
     }
-    
+
     return 0;
 }
 
@@ -40,7 +41,7 @@ int AskChoice() {
 }
 
 void DisplayMenu() {
-    printf("Attendance\n");
+    printf("\n---Attendance---\n");
     printf("[1] Record attendance\n");
     printf("[2] Remove attendance\n");
     printf("[3] Search\n");
@@ -53,34 +54,26 @@ void GoToChoice(int choice, INFO attendance[], int *front, int *rear) {
     switch (choice) {
         case 1:
             Enqueue(attendance, front, rear);
-            break;
+        break;
         case 2:
             Dequeue(attendance, front);
-            break;
+        break;
         case 3:
             Search(attendance, *front, *rear);
-            break;
+        break;
         case 4:
             DisplayQueue(attendance, *front, *rear);
-            break;
+        break;
         case 5:
             Peek(attendance, *front);
-            break;
+        break;
         case 6:
             printf("Exiting...\n");
-            break;
+        break;
         default:
             printf("Invalid choice.\n");
+        break;
     }
-}
-
-void InputAttendance(INFO attendance[], int *front, int *rear) {
-    printf("Enter student ID and name:\n");
-    if (*rear == MAX - 1) {
-        printf("Attendance list is full.\n");
-        return;
-    }
-    Enqueue(attendance, rear, front);
 }
 
 void Enqueue(INFO attendance[], int *front, int *rear) {
@@ -96,6 +89,7 @@ void Enqueue(INFO attendance[], int *front, int *rear) {
     printf("Enter student name:\n");
     fflush(stdin);
     gets(name);
+    
     attendance[++*rear].id = id;
     strcpy(attendance[*rear].name, name);
     printf("Attendance recorded.\n");
@@ -126,38 +120,38 @@ void Peek(INFO attendance[], int front) {
 }
 
 void Search(INFO attendance[], int front, int rear) {
-	int id = InputSearch();
-	int i;
-	
-	for (i = front; i <= rear; i++) {
-		if (attendance[i].id == id) {
-			printf("Attendance found: %d %s\n", attendance[i].id, attendance[i].name);
-			return;
-		}
-	}
-	
-	printf("Attendance not found.\n");
+    int id = InputSearch();
+    int i;
+    
+    for (i = front; i <= rear; i++) {
+        if (attendance[i].id == id) {
+            printf("Attendance found: %d %s\n", attendance[i].id, attendance[i].name);
+            return;
+        }
+    }
+    
+    printf("Attendance not found.\n");
 }
 
 int InputSearch() {
-	int id;
+    int id;
 
-	printf("Enter student ID to search: ");
-	scanf("%d", &id);
-	
-	return id;
+    printf("Enter student ID to search: ");
+    scanf("%d", &id);
+    
+    return id;
 }
 
 void DisplayQueue(INFO attendance[], int front, int rear) {
-	int i;
-	
-	if (front == -1) {
-		printf("Attendance list is empty.\n");
-		return;
-	}
+    int i;
+    
+    if (front == -1) {
+        printf("Attendance list is empty.\n");
+        return;
+    }
 
-	printf("Attendance list:\n");
-	for (i = front; i <= rear; i++) {
-		printf("%d %s\n", attendance[i].id, attendance[i].name);
-	}
+    printf("Attendance list:\n");
+    for (i = front; i <= rear; i++) {
+        printf("%d %s\n", attendance[i].id, attendance[i].name);
+    }
 }
