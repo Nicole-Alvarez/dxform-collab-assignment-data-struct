@@ -149,8 +149,9 @@ void Enqueue(INFO attendance[], int *front, int *rear) {
 
 void Dequeue(INFO attendance[], int *front, int *rear)
 {
+	int flag = 0;
     if (*front == -1 && *rear == -1) {
-        printf("Circular Queue is empty\n");
+        QueueStatus(flag); 
     } else if (*front == *rear) {
   	 	printf("Removed attendance: %d %s\n", attendance[*front].id, attendance[*front].name);
         *front = *rear = -1;
