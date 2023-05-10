@@ -5,7 +5,7 @@
 #define MAX_SIZE 5
 
 typedef struct data{  
-    char id[30]; 
+    int id; 
     char name[30]; 
     char gender[10];
     int year;
@@ -13,222 +13,220 @@ typedef struct data{
     char dateTime[30];  
  }INFO;
 
-INFO attendance[MAX_SIZE];
-int front = -1;
-int rear = -1;
-
-int menuDisplay(); 
-void choiceReturn();  
-void inputAppointment(); 
-void enqueque(char[10], char[30], char[10], int, char[30], char[30]); 
-void dequeue(); 
-void peek();
-void inputSearch();
-void search(char[10]);
-void displayQueue();
+int InputChoice();
+int InputSearch();
+void DisplayMenu(); 
+void QueueStatus();
+void Enqueue(INFO attendance[], int *front, int *rear); 
+void Dequeue(INFO attendance[], int *front, int *rear);
+void Peek(INFO attendance[], int front, int rear);
+void Search(INFO attendance[], int front, int rear);
+void DisplayQueue(INFO attendance[], int front, int rear);
+void GoToChoice(int choice, INFO attendance[], int *front, int *rear);
 
 int main()
 {
-    choiceReturn();
+	int choice = 0;
+	INFO attendance[MAX_SIZE];
+	int front = -1, rear = -1;
+	
+	do{  
+        DisplayMenu();
+        choice = InputChoice();
+        GoToChoice(choice, attendance, &front, &rear);
+    }while(choice!=5);
+    
+    return 0;
 }
 
-int menuDisplay()
-{
+int InputChoice() {
     int choice;
-    printf("\n\nLecture Attendance\n");
-    printf("\n[1] Set Attendance"); 
-    printf("\n[2] Dequeue Attendance"); 
-    printf("\n[3] Search Apointment"); 
-    printf("\n[4] Display Apointments"); 
-    printf("\n[5] Exit\n");
-    printf("\nChoice: "); 
     scanf("%d", &choice);
+    fflush(stdin);
 
     return choice;
 }
 
-void choiceReturn()
-{ 
-    int choice;
-    do{  
-        choice = menuDisplay(); 
-  
-        switch (choice)
-        {
-            case 1: 
-                inputAppointment();
-                break;
-            case 2:
-                dequeue();
-                break; 
-            case 3:
-                inputSearch();
-                break;
-            case 4:  
-                displayQueue();
-                break; 
-            case 5:   
-                break;     
-            default:
-                printf("\nChoice Invalid.\n"); 
-                break;
-        }
+int InputSearch() {
+    int id;
+
+    printf("Enter student ID to search: ");
+    scanf("%d",&id);
     
-    }while(choice!=5);
+    return id;
 }
 
-void inputAppointment()
-{  
-    time_t currentTime;
-    struct tm *localTime; 
-    currentTime = time(NULL); 
+void DisplayMenu()
+{
+    printf("\n---Lecture Attendance---\n");
+    printf("\n[1] Set Attendance"); 
+    printf("\n[2] Remove Attendance"); 
+    printf("\n[3] Search Attendance"); 
+    printf("\n[4] Display Attendance"); 
+    printf("\n[5] Exit\n");
+    printf("\nChoice: "); 
+}
+
+void GoToChoice(int choice, INFO attendance[], int *front, int *rear) {
+    int i;
+	switch (choice) {
+        case 1:
+            Enqueue(attendance, front, rear);
+            break;
+        case 2:
+            Dequeue(attendance, front, rear);
+            break;
+        case 3:
+            Search(attendance, *front, *rear);
+            break;
+        case 4:
+            DisplayQueue(attendance, *front, *rear);
+            break;
+        case 5:
+            printf("Exiting...\n");
+            break;
+        default:
+            printf("\nChoice Invalid.\n");
+            break;
+    }
+}
+
+void Enqueue(INFO attendance[], int *front, int *rear) {
+	
+ 	time_t currentTime;
+    struct tm *localTime;
+    currentTime = time(NULL);
     localTime = localtime(&currentTime);
 
-    int year;
-    char id[10], name[30], gender[10], section[30], dateTime[30];   
- 
-    fflush(stdin);
+    int id, year, flag = 1;
+    char name[30], gender[10], section[30], dateTime[30];
+	
+	if ((*rear + 1) % MAX_SIZE == *front) {
+        QueueStatus(flag);
+        return;
+    }
+
     printf("\nID #: ");
-    fgets(id, 10, stdin);
+    scanf("%d", &id);
     fflush(stdin);
-
+    
     printf("Name: ");
-    fgets(name, 30, stdin);
-    fflush(stdin);
-
+    gets(name);
+    
     printf("Gender: ");
-    scanf("%c", &gender);  
+    gets(gender);
+
+    printf("Year Level: ");
+    scanf("%d", &year);
     fflush(stdin);
 
-    printf("School Year: "); 
-    scanf("%d", &year);  
-    fflush(stdin);
-
-    printf("Section: "); 
-    fgets(section, 30, stdin);
-    fflush(stdin);
-
+    printf("Section: ");
+    gets(section);
 
     strftime(dateTime, sizeof(dateTime), "%m-%d-%Y %H:%M:%S", localTime);
+    
+	if (*front == -1 && *rear == -1) {
+        *front = *rear = 0;
 
-    enqueque(id, name, gender, year, section, dateTime);
+       	attendance[*rear].id = id;
+        strcpy(attendance[*rear].name, name);
+        strcpy(attendance[*rear].gender, gender); 
+        attendance[*rear].year = year;  
+        strcpy(attendance[*rear].section, section);
+        strcpy(attendance[*rear].dateTime, dateTime);   
+
+    } else {
+        *rear = (*rear + 1) % MAX_SIZE;
+        
+        attendance[*rear].id = id;
+        strcpy(attendance[*rear].name, name);
+        strcpy(attendance[*rear].gender, gender);
+        attendance[*rear].year = year;  
+        strcpy(attendance[*rear].section, section);
+        strcpy(attendance[*rear].dateTime, dateTime); 
+    }
 }
 
-void enqueque(char id[10], char name[30], char gender[10], int year, char section[30], char dateTime[30] )
-{  
-
-    if ((rear + 1) % MAX_SIZE == front) {
-        printf("Circular Queue is full\n");
-    } else if (front == -1 && rear == -1) {
-        front = rear = 0;
-
-        strcpy(attendance[rear].id, id);
-        strcpy(attendance[rear].name, name);
-        strcpy(attendance[rear].gender, gender); 
-        attendance[rear].year = year;  
-        strcpy(attendance[rear].section, section);
-        strcpy(attendance[rear].dateTime, dateTime);   
-
-    } else {
-        rear = (rear + 1) % MAX_SIZE;
-        
-        strcpy(attendance[rear].id, id);
-        strcpy(attendance[rear].name, name);
-        strcpy(attendance[rear].gender, gender);
-        attendance[rear].year = year;  
-        strcpy(attendance[rear].section, section);
-        strcpy(attendance[rear].dateTime, dateTime); 
-    }
-}  
-
-void dequeue()
+void Dequeue(INFO attendance[], int *front, int *rear)
 {
-    if (front == -1 && rear == -1) {
-        printf("Circular Queue is empty\n");
-    } else if (front == rear) {
-        peek();
-        front = rear = -1;
-        printf("Dequeue succesful.\n");
+	int flag = 0;
+    if (*front == -1 && *rear == -1) {
+        QueueStatus(flag); 
+    } else if (*front == *rear) {
+  	 	printf("Removed attendance: %d %s\n", attendance[*front].id, attendance[*front].name);
+        *front = *rear = -1;
     } else {
-        peek();
-        front = (front + 1) % MAX_SIZE;
-        printf("Dequeue succesful.\n");
+  	 	printf("Removed attendance: %d %s\n", attendance[*front].id, attendance[*front].name);
+        *front = (*front + 1) % MAX_SIZE;
     }
 } 
 
-void peek() 
+void Peek(INFO attendance[], int front, int rear) 
 {
-    fflush(stdin);
+	int flag =0;
     if (front == -1 && rear == -1) {
-        printf("Queue is empty\n"); 
+		QueueStatus(flag); 
     } else{
-        printf("\nID: %s", attendance[front].id);
+        printf("\nID: %d", attendance[front].id);
         printf("\nName: %s", attendance[front].name);
         printf("\nGender: %s", attendance[front].gender);
         printf("\nYear & Section: %d - %s", attendance[front].year, attendance[front].section); 
         printf("\nDatetime: %s", attendance[front].dateTime);
     }
-}
+}	
 
-void inputSearch()
+void Search(INFO attendance[], int front, int rear) 
 {
-    char id[10];
-
-    fflush(stdin);
-    printf("\nSearch by ID #: ");
-    fgets(id, 10, stdin);
-    fflush(stdin);
-
-    search(id);
-}
-
-void search(char id[30]) 
-{
-    int flag = 1;
+	int id = InputSearch();
+    int flag = 0;
     
     fflush(stdin);
     if (front == -1 && rear == -1) {
-        printf("Queue is empty\n"); 
+         QueueStatus(flag);
     } else{
         int i = front;
         do {  
-            if(strcmp(attendance[i].id, id) == 0){
-                printf("\n\nID: %s", attendance[i].id);
-                printf("\nName: %s", attendance[i].name);
-                printf("\nGender: %s", attendance[i].gender);
-                printf("\nYear & Section: %d - %s", attendance[i].year, attendance[i].section); 
-                printf("\nDatetime: %s", attendance[i].dateTime);
-
-                flag = 0;
-            } 
+            if(attendance[i].id == id){
+                printf("Attendee is present:\n");
+				printf("ID: %d\n", attendance[i].id);
+  				printf("Name: %s\n", attendance[i].name);
+    			printf("Gender: %s\n", attendance[i].gender);
+     			printf("Year & Section: %d - %s\n", attendance[i].year, attendance[i].section); 
+ 				printf("Datetime: %s\n\n", attendance[i].dateTime);
+ 				return;
+			 } 
             i = (i + 1) % MAX_SIZE;
         } while (i != (rear + 1) % MAX_SIZE);
         printf("\n"); 
     }
+    
+    printf("Attendee is absent\n");
+}
 
-    if(flag==1){
-        printf("Attendee is absent\n"); 
+void DisplayQueue(INFO attendance[], int front, int rear) {
+	int flag = 0;
+	
+    if (front == -1 && rear == -1) {
+        QueueStatus(flag);
+    } else {
+        int i = front;
+        printf("----Attendance---\n");
+        printf("\n\n+--------------------------------------------------------------------------------+");
+        printf("\n| ID   | Name                 | Gender | Year & Section   | Datetime             |");
+        printf("\n+--------------------------------------------------------------------------------+\n");
+        do {
+        	printf("\n| %-4d | %-20s | %-6s | %d - %-12s | %-20s |", attendance[i].id, attendance[i].name, attendance[i].gender, attendance[i].year, attendance[i].section, attendance[i].dateTime);
+            i = (i + 1) % MAX_SIZE;
+        }while(i != (rear + 1) % MAX_SIZE);
+        printf("\n+--------------------------------------------------------------------------------+\n");
     }
 }
 
-void displayQueue()
-{
-    fflush(stdin);
-    if (front == -1 && rear == -1) {
-        printf("\nCircular Queue is empty\n");
-    } else {
-        printf("\nAttendees are:\n");
-        int i = front;
-        do {  
-            printf("\n------------------\n");
-            printf("\nID: %s", attendance[i].id);
-            printf("\nName: %s", attendance[i].name);
-            printf("\nGender: %s", attendance[i].gender);
-            printf("\nYear & Section: %d - %s", attendance[i].year, attendance[i].section); 
-            printf("\nDatetime: %s\n", attendance[i].dateTime);
-
-            i = (i + 1) % MAX_SIZE;
-        } while (i != (rear + 1) % MAX_SIZE);
-        printf("\n");
-    }
+void QueueStatus(int flag){
+	if(flag == 0){
+		printf("Attendance is empty!\n");
+	}
+	else{
+		printf("Attendance is full!\n");
+	}
 }
