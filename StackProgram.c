@@ -12,17 +12,17 @@ Stack* CreateNode(char data);
 void Push(Stack** top, char data);
 char Pop(Stack** top);
 int IsEmpty(Stack* top);
-void evaluateChar(Stack** top, char c, int* underFlowFlag, int* tagFlag);
-void getInput(Stack** top, int* underFlowFlag, int* tagFlag);
-void printResult(Stack** top, int underFlowFlag, int tagFlag);
+void EvaluateChar(Stack** top, char c, int* underFlowFlag, int* tagFlag);
+void GetInput(Stack** top, int* underFlowFlag, int* tagFlag);
+void PrintResult(Stack** top, int underFlowFlag, int tagFlag);
 void FreeStack(Stack* top);
 int main()
 {
     Stack* top = NULL;
     int underFlowFlag = 0;
     int tagFlag = 0;
-    getInput(&top, &underFlowFlag, &tagFlag);
-    printResult(&top, underFlowFlag, tagFlag);
+    GetInput(&top, &underFlowFlag, &tagFlag);
+    PrintResult(&top, underFlowFlag, tagFlag);
     FreeStack(top);
     return 0;
 }
@@ -63,7 +63,7 @@ int IsEmpty(Stack* top)
 {
     return top == NULL;
 }
-void evaluateChar(Stack** top, char c, int* underFlowFlag, int* tagFlag)
+void EvaluateChar(Stack** top, char c, int* underFlowFlag, int* tagFlag)
 {
     char data;
     if(c == OPEN_TAG)
@@ -78,41 +78,40 @@ void evaluateChar(Stack** top, char c, int* underFlowFlag, int* tagFlag)
         if(!data)
         {
             *underFlowFlag = 1;
-            printResult(top, *underFlowFlag, *tagFlag);
+            PrintResult(top, *underFlowFlag, *tagFlag);
             FreeStack(*top);
             exit(1);
         }
     }
 }
-void getInput(Stack** top, int* underFlowFlag, int* tagFlag)
+void GetInput(Stack** top, int* underFlowFlag, int* tagFlag)
 {
     char inputChar;
     printf("Input the string to evaluate: ");
     while((inputChar = getchar()) != '\n')
     {
-        evaluateChar(top, inputChar, underFlowFlag, tagFlag);
+        EvaluateChar(top, inputChar, underFlowFlag, tagFlag);
     }
 
 }
-void printResult(Stack** top, int underFlowFlag, int tagFlag)
+void PrintResult(Stack** top, int underFlowFlag, int tagFlag)
 {
     if(underFlowFlag > 0)
     {
-        printf("stack underflow: missing pair for >");
+        printf("Stack underflow: missing pair for >");
         return;
     }
     if(tagFlag < 1)
     {
         printf("String expression is valid, but no tags were inputted");
-        printf("%d", tagFlag);
         return;
     }
     if(IsEmpty(*top))
         printf("Complete '<' and '>' pairs");
     else
     {
-        char data = Pop(top);
-        printf("Missing pair for %c", data);
+        char res = Pop(top);
+        printf("Missing pair for %c", res);
     }
 }
 void FreeStack(Stack* top)
