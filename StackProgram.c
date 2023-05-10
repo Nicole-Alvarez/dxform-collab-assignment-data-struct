@@ -12,15 +12,17 @@ Stack* CreateNode(char data);
 void Push(Stack** top, char data);
 char Pop(Stack** top);
 int IsEmpty(Stack* top);
-void evaluateChar(Stack** top, char c);
-void getInput(Stack** top);
-void printResult(Stack** top);
+void evaluateChar(Stack** top, char c, int* underFlowFlag, int* tagFlag);
+void getInput(Stack** top, int* underFlowFlag, int* tagFlag);
+void printResult(Stack** top, int underFlowFlag, int tagFlag);
 void FreeStack(Stack* top);
 int main()
 {
     Stack* top = NULL;
-    getInput(&top);
-    printResult(&top);
+    int underFlowFlag = 0;
+    int tagFlag = 0;
+    getInput(&top, &underFlowFlag, &tagFlag);
+    printResult(&top, underFlowFlag, tagFlag);
     FreeStack(top);
     return 0;
 }
@@ -61,35 +63,52 @@ int IsEmpty(Stack* top)
 {
     return top == NULL;
 }
-void evaluateChar(Stack** top, char c)
+void evaluateChar(Stack** top, char c, int* underFlowFlag, int* tagFlag)
 {
     char data;
     if(c == OPEN_TAG)
+    {
         Push(top, c);
+        if(*tagFlag <= 0)
+            *tagFlag = 1;
+    }
     if(c == CLOSE_TAG)
     {
         data = Pop(top);
         if(!data)
         {
-            printf("Missing pair for %c.\n", c);
+            *underFlowFlag = 1;
+            printResult(top, *underFlowFlag, *tagFlag);
+            FreeStack(*top);
             exit(1);
         }
     }
 }
-void getInput(Stack** top)
+void getInput(Stack** top, int* underFlowFlag, int* tagFlag)
 {
     char inputChar;
     printf("Input the string to evaluate: ");
     while((inputChar = getchar()) != '\n')
     {
-        evaluateChar(top, inputChar);
+        evaluateChar(top, inputChar, underFlowFlag, tagFlag);
     }
 
 }
-void printResult(Stack** top)
+void printResult(Stack** top, int underFlowFlag, int tagFlag)
 {
+    if(underFlowFlag > 0)
+    {
+        printf("stack underflow: missing pair for >");
+        return;
+    }
+    if(tagFlag < 1)
+    {
+        printf("String expression is valid, but no tags were inputted");
+        printf("%d", tagFlag);
+        return;
+    }
     if(IsEmpty(*top))
-        printf("Complete pairs");
+        printf("Complete '<' and '>' pairs");
     else
     {
         char data = Pop(top);
