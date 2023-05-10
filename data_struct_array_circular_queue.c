@@ -19,7 +19,6 @@ void DisplayMenu();
 void QueueStatus();
 void Enqueue(INFO attendance[], int *front, int *rear); 
 void Dequeue(INFO attendance[], int *front, int *rear);
-void Peek(INFO attendance[], int front, int rear);
 void Search(INFO attendance[], int front, int rear);
 void DisplayQueue(INFO attendance[], int front, int rear);
 void GoToChoice(int choice, INFO attendance[], int *front, int *rear);
@@ -159,21 +158,7 @@ void Dequeue(INFO attendance[], int *front, int *rear)
   	 	printf("Removed attendance: %d %s\n", attendance[*front].id, attendance[*front].name);
         *front = (*front + 1) % MAX_SIZE;
     }
-} 
-
-void Peek(INFO attendance[], int front, int rear) 
-{
-	int flag =0;
-    if (front == -1 && rear == -1) {
-		QueueStatus(flag); 
-    } else{
-        printf("\nID: %d", attendance[front].id);
-        printf("\nName: %s", attendance[front].name);
-        printf("\nGender: %s", attendance[front].gender);
-        printf("\nYear & Section: %d - %s", attendance[front].year, attendance[front].section); 
-        printf("\nDatetime: %s", attendance[front].dateTime);
-    }
-}	
+}  
 
 void Search(INFO attendance[], int front, int rear) 
 {
