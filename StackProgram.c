@@ -126,4 +126,3 @@ void FreeStack(Stack* top)
         free(temp);
     }
 }
-
