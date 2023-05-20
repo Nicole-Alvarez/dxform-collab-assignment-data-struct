@@ -142,9 +142,9 @@ int IsFullBinaryTree(struct Node *root) {
 
 void FullBinaryResult(int isFull){
 	if (isFull){
-		printf("The binary tree is a complete binary tree.\n");
+		printf("The binary tree is a Full Binary Tree.\n");
 	} else{
-		printf("The binary tree is not a complete binary tree.\n");
+		printf("The binary tree is not a Full Binary Tree.\n");
 	}
 }
 
