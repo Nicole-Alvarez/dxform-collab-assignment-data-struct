@@ -1,22 +1,45 @@
 #include <stdio.h>
-#include <time.h>
+#include <stdlib.h>
+
+struct TreeNode {
+    int val;
+    struct TreeNode* left;
+    struct TreeNode* right;
+};
+
+struct TreeNode* createNode(int val) {
+    struct TreeNode* newNode = (struct TreeNode*)malloc(sizeof(struct TreeNode));
+    newNode->val = val;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+int max(int a, int b) {
+    return (a > b) ? a : b;
+}
+
+int getHeight(struct TreeNode* root) {
+    if (root == NULL) {
+        return -1;  // height of an empty tree is -1
+    }
+
+    int leftHeight = getHeight(root->left);
+    int rightHeight = getHeight(root->right);
+
+    return max(leftHeight, rightHeight) + 1;
+}
 
 int main() {
-    char time_str[50];
-    time_t current_time;
-    struct tm* local_time;
+    struct TreeNode* root = createNode(5);
+    root->left = createNode(2);
+    root->right = createNode(8);
+    root->left->left = createNode(1);
+    root->left->right = createNode(4);
+    root->right->right = createNode(9);
 
-    // Get the current time
-    current_time = time(NULL);
-
-    // Convert to local time
-    local_time = localtime(&current_time);
-
-    // Format the time as a string
-    strftime(time_str, sizeof(time_str), "%m-%d-%Y %H:%M:%S", local_time);
-
-    // Print the formatted time string
-    printf("Current time: %s\n", time_str);
+    int height = getHeight(root);
+    printf("Height of the binary tree: %d\n", height);
 
     return 0;
 }
