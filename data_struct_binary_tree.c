@@ -70,7 +70,7 @@ void GoToChoice(int choice, struct Node **root) {
             
         break;
         case 3:
-            isFull = IsFullBinaryTree();
+            isFull = IsFullBinaryTree(*root);
             FullBinaryResult(isFull);
         break;
         case 4:
