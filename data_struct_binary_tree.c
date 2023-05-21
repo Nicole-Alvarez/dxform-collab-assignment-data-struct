@@ -6,11 +6,6 @@ struct Node {
     struct Node *left;
     struct Node *right;
 };
-struct Parameter {
-    struct Node* node;
-    int level;
-    int maxDepth;
-};
 
 int InputChoice();
 int InputData();
@@ -21,7 +16,6 @@ void PrintNodes(struct Node *root);
 int IsFullBinaryTree(struct Node *root);
 int CalculateMaxDepth(struct Node* node);
 int IsCompleteBinaryTree(struct Node *root);
-int IsCompleteRecursive(struct Parameter);
 struct Node *CreateNode(int data);
 struct Node *InsertNode(struct Node *root, int data);
 
@@ -161,27 +155,50 @@ int CalculateMaxDepth(struct Node* node) {
 
     int leftDepth = CalculateMaxDepth(node->left);
     int rightDepth = CalculateMaxDepth(node->right);
-
+    printf("leftDepth: %d\n", leftDepth);
     return 1 + (leftDepth > rightDepth ? leftDepth : rightDepth);
 }
-int IsCompleteRecursive(struct Parameter param)
-{
-    if (param.node == NULL) {
-        return 1;
-    }
-    if (param.level > param.maxDepth) {
-        return 0;
-    }
-    int leftComplete = IsCompleteRecursive((struct Parameter){param.node->left, param.level + 1, param.maxDepth});
-    int rightComplete = IsCompleteRecursive((struct Parameter){param.node->right, param.level + 1, param.maxDepth});
 
-    return leftComplete && rightComplete;
-}
 int IsCompleteBinaryTree(struct Node* root) {
-    int maxDepth = CalculateMaxDepth(root); // Calculate the maximum depth of the tree
-    struct Parameter initialParam = {root, 0, maxDepth};
-    return IsCompleteRecursive(initialParam);
+    if (root == NULL)
+        return 1;
+    int flag = 0; // Flag to track if we have encountered a non-full node
 
+    // Create a queue for level order traversal
+    struct Node** queue = (struct Node**)malloc(sizeof(struct Node*) * 1000);
+    int front = 0, rear = 0;
+    queue[rear++] = root;
+
+    while (front < rear) {
+        struct Node* current = queue[front++];
+
+        // If we have encountered a non-full node before, but the current node has any child, it is not a complete binary tree
+        if (flag && (current->left != NULL || current->right != NULL)) {
+            free(queue);
+            return 0;
+        }
+
+        // If the current node has no left child, mark the flag to indicate a non-full node
+        if (current->left == NULL) {
+            flag = 1;
+        }
+        // If the current node has a left child, enqueue it
+        else {
+            queue[rear++] = current->left;
+        }
+
+        // If the current node has no right child, mark the flag to indicate a non-full node
+        if (current->right == NULL) {
+            flag = 1;
+        }
+        // If the current node has a right child, enqueue it
+        else {
+            queue[rear++] = current->right;
+        }
+    }
+
+    free(queue);
+    return 1;
 }
 //End Flag
 void FullBinaryResult(int isFull){
