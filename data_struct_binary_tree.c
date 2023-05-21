@@ -14,6 +14,8 @@ void FullBinaryResult(int);
 void GoToChoice(int choice, struct Node **root);
 void PrintNodes(struct Node *root);
 int IsFullBinaryTree(struct Node *root);
+int Max(int, int);
+int GetHeight(struct Node* root);
 struct Node *CreateNode(int data);
 struct Node *InsertNode(struct Node *root, int data);
 
@@ -60,14 +62,15 @@ void DisplayMenu()
 }
 
 void GoToChoice(int choice, struct Node **root) {
-    int i, data, isFull;
+    int i, data, isFull, height;
 	switch (choice) {
         case 1:
 			data = InputData();
 			*root = InsertNode(*root, data);
 		break;
         case 2:
-            
+            height = getHeight(*root);
+            printf("Height of the binary tree: %d\n", height);
         break;
         case 3:
             isFull = IsFullBinaryTree(*root);
@@ -147,6 +150,21 @@ void FullBinaryResult(int isFull){
 		printf("The binary tree is not a Full Binary Tree.\n");
 	}
 }
+
+int Max(int leftHeight, int rightHeight) {
+    return (a > b) ? a : b;
+}
+
+int GetHeight(struct Node* root) {
+    if (root == NULL) {
+        return -1;  // height of an empty tree is -1
+    }
+
+    int leftHeight = getHeight(root->left);
+    int rightHeight = getHeight(root->right);
+
+    return max(leftHeight, rightHeight) + 1;
+} 
 
 void PrintNodes(struct Node *root) {
     if (root == NULL){
