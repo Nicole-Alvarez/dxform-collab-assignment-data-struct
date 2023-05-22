@@ -188,7 +188,7 @@ int IsCompleteBinaryTree(struct Node* root)
 
 int GetHeight(struct Node* node) {
     if (node == NULL) {
-        return 0; // An empty tree has a depth of 0
+        return -1; // An empty tree has a depth of 0
     }
 
     int leftDepth = CalculateMaxDepth(node->left);
