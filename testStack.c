@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define OPEN_TAG '<'
+#define CLOSE_TAG '>'
 typedef struct node {
     char data;
     struct node* next;
