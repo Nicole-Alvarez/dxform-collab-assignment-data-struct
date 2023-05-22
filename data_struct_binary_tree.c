@@ -14,8 +14,9 @@ void FullBinaryResult(int);
 void GoToChoice(int choice, struct Node **root);
 void PrintNodes(struct Node *root);
 int IsFullBinaryTree(struct Node *root);
-int CalculateMaxDepth(struct Node* node);
 int IsCompleteBinaryTree(struct Node *root);
+int Max(int, int);
+int GetHeight(struct Node* root);
 struct Node *CreateNode(int data);
 struct Node *InsertNode(struct Node *root, int data);
 
@@ -62,15 +63,15 @@ void DisplayMenu()
 }
 
 void GoToChoice(int choice, struct Node **root) {
-    int i, data, isFull, res;
+    int i, data, isFull, height;
 	switch (choice) {
         case 1:
 			data = InputData();
 			*root = InsertNode(*root, data);
 		break;
         case 2:
-            res = CalculateMaxDepth(*root);
-            printf("Height is %d", res);
+            height = getHeight(*root);
+            printf("Height of the binary tree: %d\n", height);
         break;
 
         case 3:
@@ -147,17 +148,6 @@ int IsFullBinaryTree(struct Node *root) {
 
     return 0;
 }
-//Ivan Flag
-int CalculateMaxDepth(struct Node* node) {
-    if (node == NULL) {
-        return 0; // An empty tree has a depth of 0
-    }
-
-    int leftDepth = CalculateMaxDepth(node->left);
-    int rightDepth = CalculateMaxDepth(node->right);
-    printf("leftDepth: %d\n", leftDepth);
-    return 1 + (leftDepth > rightDepth ? leftDepth : rightDepth);
-}
 
 int IsCompleteBinaryTree(struct Node* root)
 {
@@ -195,13 +185,16 @@ int IsCompleteBinaryTree(struct Node* root)
     free(queue);
     return 1;
 }
-//End Flag
-void FullBinaryResult(int isFull){
-	if (isFull){
-		printf("The binary tree is a Full Binary Tree.\n");
-	} else{
-		printf("The binary tree is not a Full Binary Tree.\n");
-	}
+
+int GetHeight(struct Node* node) {
+    if (node == NULL) {
+        return 0; // An empty tree has a depth of 0
+    }
+
+    int leftDepth = CalculateMaxDepth(node->left);
+    int rightDepth = CalculateMaxDepth(node->right);
+    printf("leftDepth: %d\n", leftDepth);
+    return 1 + (leftDepth > rightDepth ? leftDepth : rightDepth);
 }
 
 void PrintNodes(struct Node *root) {
