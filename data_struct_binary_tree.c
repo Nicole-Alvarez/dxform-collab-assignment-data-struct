@@ -159,12 +159,12 @@ int CalculateMaxDepth(struct Node* node) {
     return 1 + (leftDepth > rightDepth ? leftDepth : rightDepth);
 }
 
-int IsCompleteBinaryTree(struct Node* root) {
+int IsCompleteBinaryTree(struct Node* root)
+{
     if (root == NULL)
         return 1;
-    int flag = 0; // Flag to track if we have encountered a non-full node
+    int flag = 0;
 
-    // Create a queue for level order traversal
     struct Node** queue = (struct Node**)malloc(sizeof(struct Node*) * 1000);
     int front = 0, rear = 0;
     queue[rear++] = root;
@@ -172,31 +172,26 @@ int IsCompleteBinaryTree(struct Node* root) {
     while (front < rear) {
         struct Node* current = queue[front++];
 
-        // If we have encountered a non-full node before, but the current node has any child, it is not a complete binary tree
-        if (flag && (current->left != NULL || current->right != NULL)) {
+        if (flag && (current->left != NULL || current->right != NULL))
+        {
+            free(current);
             free(queue);
             return 0;
         }
-
-        // If the current node has no left child, mark the flag to indicate a non-full node
         if (current->left == NULL) {
             flag = 1;
         }
-        // If the current node has a left child, enqueue it
         else {
             queue[rear++] = current->left;
         }
-
-        // If the current node has no right child, mark the flag to indicate a non-full node
         if (current->right == NULL) {
             flag = 1;
         }
-        // If the current node has a right child, enqueue it
         else {
             queue[rear++] = current->right;
         }
     }
-
+    free(current);
     free(queue);
     return 1;
 }
