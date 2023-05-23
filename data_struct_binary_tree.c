@@ -62,7 +62,7 @@ void DisplayMenu()
 }
 
 void GoToChoice(int choice, struct Node **root) {
-    int i, data, isFull, isComplete, height;
+    int data, isFull, isComplete, height;
 	switch (choice) {
         case 1:
 			data = InputData();
