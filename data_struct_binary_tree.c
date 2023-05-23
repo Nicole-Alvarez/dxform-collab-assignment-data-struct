@@ -1,5 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <setjmp.h>
+#include "./error.h"
+
+#define SUCCESS 1
+#define FAILURE 0
+#define INVALID_CHOICE_MSG() printf("\nChoice Invalid.\n")
+#define EXIT_MSG() printf("Exiting...\n")
+
+jmp_buf jump_buffer;
 
 struct Node {
     int data;
@@ -7,24 +16,38 @@ struct Node {
     struct Node *right;
 };
 
+struct NodeArrParams {
+    struct Node* root;
+    struct Node** nodeArr;
+    int* rear;
+};
+
 int InputChoice();
 int InputData();
 void DisplayMenu();
-void FullBinaryResult(int);
 void GoToChoice(int choice, struct Node **root);
-void PrintNodes(struct Node *root);
-int IsFullBinaryTree(struct Node *root);
-int IsCompleteBinaryTree(struct Node *root);
-int GetHeight(struct Node* root);
 struct Node *CreateNode(int data);
 struct Node *InsertNode(struct Node *root, int data);
+
+int IsFullBinaryTree(struct Node *root);
+
+int IsCompleteBinaryTree(struct Node *root);
+struct Node** CreateNodeArr();
+struct Node** FillNodeArray(struct NodeArrParams);
+
+int GetHeight(struct Node* root);
+void PrintHeight(int height);
+
+void PrintResult(int status, int choice);
+void PrintNodes(struct Node *root);
 
 int main()
 {
 	struct Node *root = NULL;
 	int choice = 0;
 
-	do{
+	do
+    {
         DisplayMenu();
         choice = InputChoice();
         GoToChoice(choice, &root);
@@ -61,70 +84,87 @@ void DisplayMenu()
     printf("\nChoice: ");
 }
 
-void GoToChoice(int choice, struct Node **root) {
-    int data, isFull, isComplete, height;
-	switch (choice) {
+void GoToChoice(int choice, struct Node **root)
+{
+    int data;
+	switch (choice)
+	{
         case 1:
 			data = InputData();
-			*root = InsertNode(*root, data);
+			if (setjmp(jump_buffer) == 0)
+            {
+                *root = InsertNode(*root, data);
+			}
 		break;
         case 2:
-            height = GetHeight(*root);
-            printf("Height of the binary tree: %d\n", height);
+            PrintHeight(GetHeight(*root));
         break;
+
         case 3:
-            isFull = IsFullBinaryTree(*root);
-            FullBinaryResult(isFull);
+            PrintResult(IsFullBinaryTree(*root), choice);
         break;
         case 4:
-            isComplete = IsCompleteBinaryTree(*root);
-            if(isComplete)
-                printf("success");
-            else
-                printf("Dead");
+            if (setjmp(jump_buffer) == 0)
+            {
+                PrintResult(IsCompleteBinaryTree(*root), choice);
+            }
         break;
        	case 5:
-            PrintNodes(*root);
+                if(*root)
+                    PrintNodes(*root);
+                else
+                    printerr_null_param();
         break;
   		case 6:
-            printf("Exiting...\n");
+            EXIT_MSG();
     	break;
         default:
-            printf("\nChoice Invalid.\n");
+            INVALID_CHOICE_MSG();
         break;
     }
 }
 
-struct Node *CreateNode(int data) {
+struct Node *CreateNode(int data)
+{
     struct Node *newNode = (struct Node*)malloc(sizeof(struct Node));
+    if (!newNode)
+    {
+        printerr_allocation();
+        longjmp(jump_buffer, 1);
+    }
     newNode->data = data;
     newNode->left = NULL;
     newNode->right = NULL;
     return newNode;
 }
 
-struct Node *InsertNode(struct Node *root, int data) {
-    if (root == NULL){
+struct Node *InsertNode(struct Node *root, int data)
+{
+    if (!root){
     	return CreateNode(data);
     }
 
     struct Node* currentNode = root;
     struct Node* parentNode = NULL;
 
-    while (currentNode != NULL) {
+    while (currentNode != NULL)
+    {
         parentNode = currentNode;
-        if (data <= currentNode->data){
+        if (data <= currentNode->data)
+        {
         	currentNode = currentNode->left;
         }
-        else{
+        else
+        {
         	currentNode = currentNode->right;
         }
     }
 
-    if (data <= parentNode->data){
+    if (data <= parentNode->data)
+    {
     	parentNode->left = CreateNode(data);
-    }
-    else{
+    }else
+    {
     	parentNode->right = CreateNode(data);
     }
 
@@ -132,71 +172,84 @@ struct Node *InsertNode(struct Node *root, int data) {
 }
 
 int IsFullBinaryTree(struct Node *root) {
-    if (root == NULL){
-    	return 1;
-    }
-
-    if (root->left == NULL && root->right == NULL){
-    	return 1;
-    }
-
-    if ((root->left != NULL && root->right != NULL) && IsFullBinaryTree(root->left) && IsFullBinaryTree(root->right)){
-    	return 1;
-    }
-
-    return 0;
-}
-
-void FullBinaryResult(int isFull){
-	if (isFull){
-		printf("The binary tree is a Full Binary Tree.\n");
-	} else{
-		printf("The binary tree is not a Full Binary Tree.\n");
-	}
-}
-
-int IsCompleteBinaryTree(struct Node* root) {
     if (root == NULL)
+    {
+    	return SUCCESS;
+    }
+
+    if (root->left == NULL && root->right == NULL)
+    {
+    	return SUCCESS;
+    }
+
+    if ((root->left != NULL && root->right != NULL) && IsFullBinaryTree(root->left) && IsFullBinaryTree(root->right))
+    {
+    	return SUCCESS;
+    }
+
+    return FAILURE;
+}
+struct Node** CreateNodeArr()
+{
+    int queueSize = 1000;
+    struct Node** nodeArr = (struct Node**)malloc(sizeof(struct Node*) * queueSize);
+    if (!nodeArr)
+    {
+        printerr_allocation();
+        longjmp(jump_buffer, 1);
+    }
+    return nodeArr;
+};
+struct Node** FillNodeArray(struct NodeArrParams param)
+{
+    int front = 0;
+    param.nodeArr[(*param.rear)++] = param.root;
+
+    while (front < *param.rear) {
+        struct Node* current = param.nodeArr[front++];
+
+        if (current->left != NULL) {
+            param.nodeArr[(*param.rear)++] = current->left;
+        }
+
+        if (current->right != NULL) {
+            param.nodeArr[(*param.rear)++] = current->right;;
+        }
+    }
+    return param.nodeArr;
+}
+int IsCompleteBinaryTree(struct Node* root)
+{
+     if (!root)
         return 1;
-    int flag = 0; // Flag to track if we have encountered a non-full node
 
-    // Create a queue for level order traversal
-    struct Node** queue = (struct Node**)malloc(sizeof(struct Node*) * 1000);
-    int front = 0, rear = 0;
-    queue[rear++] = root;
+    int rear = 0;
+    struct NodeArrParams initialParam = {root, CreateNodeArr(), &rear};
+    struct Node** nodeArr = FillNodeArray(initialParam);
 
-    while (front < rear) {
-        struct Node* current = queue[front++];
-
-        // If we have encountered a non-full node before, but the current node has any child, it is not a complete binary tree
-        if (flag && (current->left != NULL || current->right != NULL)) {
-            free(queue);
-            return 0;
+    int flag = 0;
+    for (int i = 0; i < rear; i++)
+    {
+        struct Node* current = nodeArr[i];
+        if(rear == 2 && current->right != NULL)
+        {
+            free(nodeArr);
+            return FAILURE;
         }
-
-        // If the current node has no left child, mark the flag to indicate a non-full node
-        if (current->left == NULL) {
+        if (flag && (current->left != NULL || current->right != NULL))
+        {
+            free(nodeArr);
+            return FAILURE;
+        }
+        if (current->left == NULL || current->right == NULL)
+        {
             flag = 1;
-        }
-        // If the current node has a left child, enqueue it
-        else {
-            queue[rear++] = current->left;
-        }
-
-        // If the current node has no right child, mark the flag to indicate a non-full node
-        if (current->right == NULL) {
-            flag = 1;
-        }
-        // If the current node has a right child, enqueue it
-        else {
-            queue[rear++] = current->right;
         }
     }
 
-    free(queue);
-    return 1;
+    free(nodeArr);
+    return SUCCESS;
 }
-
 int GetHeight(struct Node* node) {
     if (node == NULL) {
         return -1; // An empty tree has a depth of -1
@@ -205,6 +258,19 @@ int GetHeight(struct Node* node) {
     int leftDepth = GetHeight(node->left);
     int rightDepth = GetHeight(node->right);
     return (leftDepth > rightDepth ? leftDepth : rightDepth) + 1;
+}
+//Print Functions
+void PrintResult(int status, int choice)
+{
+    if (choice == 3)
+        printf("The binary tree is %s\n", status ? "a Full Binary Tree" : "not a Full Binary Tree");
+    if(choice == 4)
+        printf("The binary tree is %s\n", status ? "a Complete Binary Tree" : "not a Complete Binary Tree");
+}
+
+void PrintHeight(int height)
+{
+    printf("Height of the binary tree: %d\n", height);
 }
 
 void PrintNodes(struct Node *root) {
