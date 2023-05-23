@@ -53,7 +53,7 @@ int InputData() {
 void DisplayMenu()
 {
     printf("\n[1] Insert Node");
-    printf("\n[2] Determine Heigh");
+    printf("\n[2] Determine Height");
     printf("\n[3] Determine if Full Binary Tree");
     printf("\n[4] Determine if Complete Binary Tree");
     printf("\n[5] Print Nodes");
@@ -72,7 +72,6 @@ void GoToChoice(int choice, struct Node **root) {
             height = GetHeight(*root);
             printf("Height of the binary tree: %d\n", height);
         break;
-
         case 3:
             isFull = IsFullBinaryTree(*root);
             FullBinaryResult(isFull);
