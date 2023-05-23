@@ -189,8 +189,6 @@ int IsFullBinaryTree(struct Node *root) {
 
     return FAILURE;
 }
-
-//Ivan Flag
 struct Node** CreateNodeArr()
 {
     int queueSize = 1000;
@@ -252,7 +250,6 @@ int IsCompleteBinaryTree(struct Node* root)
     free(nodeArr);
     return SUCCESS;
 }
-//End Flag
 int GetHeight(struct Node* node) {
     if (node == NULL) {
         return -1; // An empty tree has a depth of -1
