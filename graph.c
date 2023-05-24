@@ -84,3 +84,10 @@ int main() {
 
     return 0;
 }
+
+// user input struct string: cityname
+// undirectional
+// assign name to node
+    // ask number of vertices
+    // loop input
+
