@@ -1,181 +1,217 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
+#include <string.h>
 
-// Node structure for each element in the adjacency list
 struct Node {
-    char dest[30];
-    struct Node* next;
+	int destination;
+	struct Node *next;
 };
 
-// Graph structure
 struct Graph {
-    int numVertices;
-    struct Node** adjList;
+	int numVertices;
+	char **names;
+	struct Node **adjLists;
 };
 
-int InputChoice();
-void GoToChoice(int choice);
-int InputData();
-void DisplayMenu();
-struct Node *CreateNode(char *dest);
+struct Node *CreateNode(int destination);
 struct Graph *CreateGraph(int numVertices);
-int InputVertices();
-char InputSource(char *);
-char InputDestination(char *);
-void addEdge(struct Graph* graph, char src, char dest);
-void printGraph(struct Graph* graph, char *src, char *dest);
+void AddEdge(struct Graph *graph, int src, int dest);
+void AssignNames(struct Graph *graph);
+void AssignNeighbors(struct Graph *graph, int numVertices);
+void ShortestDistance(struct Graph *graph, int start, int dest);
+void FreeGraph(struct Graph* graph);
+int FindIndex(struct Graph *graph, const char *name);
+int GetStartingLocation(struct Graph *graph);
+int GetDestination(struct Graph *graph);
 
+int main() {
+    int numVertices;
+    char choice;
+    int start, dest;
 
-int main()
-{
-	int choice = 0;
+    printf("Enter the number of vertices: ");
+    scanf("%d", &numVertices);
 
-	do{
-        DisplayMenu();
-        choice = InputChoice();
-        GoToChoice(choice);
-    }while(choice!=5);
+    struct Graph *graph = CreateGraph(numVertices);
+
+    do {
+        printf("\n--- MENU ---\n");
+        printf("[ a ] Assign Names\n");
+        printf("[ b ] Starting Location\n");
+        printf("[ c ] Destination\n");
+        printf("[ d ] Shortest Distance\n");
+        printf("[ e ] Exit\n");
+        printf("Enter your choice: ");
+        scanf(" %c", &choice);
+
+        switch (choice) {
+        	case 'a':
+        		AssignNames(graph);
+        		AssignNeighbors(graph, numVertices);
+        	break;
+            case 'b':
+                start = GetStartingLocation(graph);
+                break;
+            case 'c':
+                dest = GetDestination(graph);
+                break;
+            case 'd':
+                ShortestDistance(graph, start, dest);
+                break;
+            case 'e':
+            	printf("Exiting...\n");
+                break;
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+        printf("\n");
+    } while (choice != 'e');
+
+    FreeGraph(graph);
 
     return 0;
 }
 
-int InputChoice() {
-    int choice;
-    scanf("%d", &choice);
-    fflush(stdin);
-
-    return choice;
+struct Node* CreateNode(int destination) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->destination = destination;
+    newNode->next = NULL;
+    return newNode;
 }
 
-int InputData() {
-	int data;
-
-	printf("Enter the value to insert: ");
- 	scanf("%d", &data);
-
-	return data;
-}
-
-void DisplayMenu()
-{
-    printf("\n[1] Assign names to Nodes");
-    printf("\n[2] Starting Location");
-    printf("\n[3] Destination");
-    printf("\n[4] Shortest Distance");
-    printf("\n[5] Exit\n");
-    printf("\nChoice: ");
-}
-
-void GoToChoice(int choice) {
-    struct Graph* graph;
-    int numVertices;
-    char source[20], destination[20];
-
-	switch (choice) {
-        case 1:
-            numVertices=InputVertices();
-            graph = CreateGraph(numVertices);
-		    break;
-        case 2:
-            InputSource(source);
-            break;
-        case 3:
-            InputDestination(destination);
-            // addEdge(graph, source, destination);
-            break;
-        case 4:
-            InputSource(source);
-            InputDestination(destination);
-            // printGraph(graph, source, destination);
-
-            // addEdge(graph, 0, 1);
-            // addEdge(graph, 0, 4);
-            // addEdge(graph, 1, 2);
-            // addEdge(graph, 1, 3);
-            // addEdge(graph, 1, 4);
-            // addEdge(graph, 2, 3);
-            // addEdge(graph, 3, 4);
-            break;
-  		case 5:
-            printf("Exiting...\n");
-    	    break;
-        default:
-            printf("\nChoice Invalid.\n");
-        break;
-    }
-}
-
-int InputVertices() {
-	int data;
-
-	printf("Enter number of vertices: ");
- 	scanf("%d", &data);
-
-	return data;
-}
-
-// Create a graph with a given number of vertices
 struct Graph* CreateGraph(int numVertices) {
+	int i;
     struct Graph* graph = (struct Graph*)malloc(sizeof(struct Graph));
     graph->numVertices = numVertices;
+    graph->names = (char**)malloc(numVertices * sizeof(char*));
+    graph->adjLists = (struct Node**)malloc(numVertices * sizeof(struct Node*));
 
-    // Create an array of adjacency lists
-    graph->adjList = (struct Node**)malloc(numVertices * sizeof(struct Node*));
-
-    // Initialize each adjacency list as empty
-    int i;
     for (i = 0; i < numVertices; i++) {
-        graph->adjList[i] = NULL;
+        graph->names[i] = NULL;
+        graph->adjLists[i] = NULL;
     }
 
     return graph;
 }
 
-char InputSource(char* str) {
-	printf("Enter the source: ");
- 	scanf("%s", str);
+void AssignNames(struct Graph *graph) {
+    int numVertices = graph->numVertices;
+    int i, nameLength;
+	char name[20];
+
+    for (i = 0; i < numVertices; i++) {
+        printf("Enter the name for node %d: ", i);
+        scanf("%s", name);
+        nameLength = strlen(name);
+        graph->names[i] = (char*)malloc((nameLength + 1) * sizeof(char));
+        strcpy(graph->names[i], name);
+        printf("Assigned name '%s' to node %d.\n", graph->names[i], i);
+    }
+    printf("\n");
 }
 
-char InputDestination(char* str) {
-	printf("Enter the destination: ");
- 	scanf("%s", str);
+void AssignNeighbors(struct Graph *graph, int numVertices){
+		int i, j;
+		char neighbor[5];
+		int numNeighbors;
+	    for (i = 0; i < numVertices; i++) {
+        printf("Enter the number of neighbors for %s: ", graph->names[i]);
+        scanf("%d", &numNeighbors);
+        for (j = 0; j < numNeighbors; j++) {
+            printf("Enter neighbor %d for %s: ", j + 1, graph->names[i]);
+            scanf("%s", neighbor);
+            int neighborIndex = FindIndex(graph, neighbor);
+            if (neighborIndex == -1) {
+                printf("Invalid neighbor name. Please try again.\n");
+                j--;
+                continue;
+            }
+            AddEdge(graph, i, neighborIndex);
+        }
+        printf("\n");
+    }
 }
 
-// Create a new node
-struct Node* CreateNode(char *dest) {
-    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
-    strcpy(dest, newNode->dest);
-    newNode->next = NULL;
-    return newNode;
-}
-
-// Add an edge to the graph
-void addEdge(struct Graph* graph, char src, char dest) {
-    // Add an edge from source to destination
+void AddEdge(struct Graph* graph, int src, int dest) {
     struct Node* newNode = CreateNode(dest);
-    newNode->next = graph->adjList[src];
-    graph->adjList[src] = newNode;
+    newNode->next = graph->adjLists[src];
+    graph->adjLists[src] = newNode;
 
-    // Uncomment the following lines if the graph is undirected
-
-    // // Add an edge from destination to source
     newNode = CreateNode(src);
-    newNode->next = graph->adjList[dest];
-    graph->adjList[dest] = newNode;
+    newNode->next = graph->adjLists[dest];
+    graph->adjLists[dest] = newNode;
 }
 
-// Print the graph
-void printGraph(struct Graph* graph, char *source, char *destination) {
-    int i, data=source;
+int FindIndex(struct Graph* graph, const char* name) {
+	int i;
+    for (i = 0; i < graph->numVertices; i++) {
+        if (strcmp(graph->names[i], name) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
 
+int GetStartingLocation(struct Graph* graph) {
+    char name[20];
+    printf("Enter the starting location: ");
+    scanf("%s", name);
+    int index = FindIndex(graph, name);
+    if (index == -1) {
+        printf("Invalid starting location. Please try again.\n");
+        return GetStartingLocation(graph);
+    }
+    return index;
+}
 
-    printf("Shortest distance from %s to %s: ", source, destination);
-    printf("%s ", source);
-    while (strcmp(data, destination);) {
-        struct Node* temp = graph->adjList[data];
-        printf("%s ", temp->dest);
-        strcpy(data, temp->dest);
+// Function to get the destination from the user
+int GetDestination(struct Graph* graph) {
+    char name[20];
+    printf("Enter the destination: ");
+    scanf("%s", name);
+    int index = FindIndex(graph, name);
+    if (index == -1) {
+        printf("Invalid destination. Please try again.\n");
+        return GetDestination(graph);
+    }
+    return index;
+}
+
+void ShortestDistance(struct Graph* graph, int start, int dest) {
+    int i, data = start;
+
+    printf("Shortest distance from node %s to node %s: ", graph->names[start], graph->names[dest]);
+    printf("%s ", graph->names[start]);
+    while (data != dest) {
+        struct Node* temp = graph->adjLists[data];
+        printf("%s ", graph->names[temp->destination]);
+        data = temp->destination;
         temp = temp->next;
     }
     printf("\n");
+}
+
+void FreeGraph(struct Graph *graph) {
+	int i;
+    if (graph) {
+        if (graph->adjLists) {
+            for (i = 0; i < graph->numVertices; i++) {
+                struct Node* temp = graph->adjLists[i];
+                while (temp) {
+                    struct Node* prev = temp;
+                    temp = temp->next;
+                    free(prev);
+                }
+            }
+            free(graph->adjLists);
+        }
+        if (graph->names) {
+            for (i = 0; i < graph->numVertices; i++) {
+                free(graph->names[i]);
+            }
+            free(graph->names);
+        }
+        free(graph);
+    }
 }
