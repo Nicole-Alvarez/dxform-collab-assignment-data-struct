@@ -18,6 +18,9 @@ int InputData();
 void DisplayMenu();
 struct Node *CreateNode(int dest);
 struct Node *CreateGraph(int numVertices);
+int InputSource();
+int InputDestination();
+
 
 int main()
 {
@@ -61,15 +64,29 @@ void DisplayMenu()
 }
 
 void GoToChoice(int choice, struct Node **root) {
-    
+    int source, destination;
+    int numVertices = 5;
+
 	switch (choice) {
         case 1:
+            struct Graph* graph = createGraph(numVertices);
 		break;
         case 2:
+            source=InputSource();
         break;
         case 3:
+            destination=InputDestination();
         break;
         case 4:
+            addEdge(graph, source, destination);
+            addEdge(graph, 0, 4);
+            addEdge(graph, 1, 2);
+            addEdge(graph, 1, 3);
+            addEdge(graph, 1, 4);
+            addEdge(graph, 2, 3);
+            addEdge(graph, 3, 4);
+
+            printGraph(graph);
         break;
   		case 5:
             printf("Exiting...\n");
@@ -103,4 +120,51 @@ struct Graph* createGraph(int numVertices) {
     }
 
     return graph;
+}
+
+int InputSource() {
+	int data;
+
+	printf("Enter the source: ");
+ 	scanf("%d", &data);
+
+	return data;
+}
+
+int InputDestination() {
+	int data;
+
+	printf("Enter the destination: ");
+ 	scanf("%d", &data);
+
+	return data;
+}
+
+// Add an edge to the graph
+void addEdge(struct Graph* graph, int src, int dest) {
+    // Add an edge from source to destination
+    struct Node* newNode = createNode(dest);
+    newNode->next = graph->adjList[src];
+    graph->adjList[src] = newNode;
+
+    // Uncomment the following lines if the graph is undirected
+
+    // // Add an edge from destination to source
+    // newNode = createNode(src);
+    // newNode->next = graph->adjList[dest];
+    // graph->adjList[dest] = newNode;
+}
+
+// Print the graph
+void printGraph(struct Graph* graph) {
+    int i;
+    for (i = 0; i < graph->numVertices; i++) {
+        struct Node* temp = graph->adjList[i];
+        printf("Adjacency list of vertex %d: ", i);
+        while (temp) {
+            printf("%d ", temp->dest);
+            temp = temp->next;
+        }
+        printf("\n");
+    }
 }
