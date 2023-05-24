@@ -3,7 +3,7 @@
 
 // Node structure for each element in the adjacency list
 struct Node {
-    char dest[30];
+    int dest;
     struct Node* next;
 };
 
@@ -17,13 +17,13 @@ int InputChoice();
 void GoToChoice(int choice);
 int InputData();
 void DisplayMenu();
-struct Node *CreateNode(char *dest);
+struct Node *CreateNode(int dest);
 struct Graph *CreateGraph(int numVertices);
 int InputVertices();
-char InputSource(char *);
-char InputDestination(char *);
-void addEdge(struct Graph* graph, char src, char dest);
-void printGraph(struct Graph* graph, char *src, char *dest);
+int InputSource();
+int InputDestination();
+void addEdge(struct Graph* graph, int src, int dest);
+void printGraph(struct Graph* graph, int src, int dest);
 
 
 int main()
@@ -68,37 +68,36 @@ void DisplayMenu()
 
 void GoToChoice(int choice) {
     struct Graph* graph;
-    int numVertices;
-    char source[20], destination[20];
+    int source, destination, numVertices;
 
 	switch (choice) {
         case 1:
             numVertices=InputVertices();
             graph = CreateGraph(numVertices);
-		    break;
+		break;
         case 2:
-            InputSource(source);
-            break;
+            source=InputSource();
+        break;
         case 3:
-            InputDestination(destination);
+            // destination=InputDestination();
             // addEdge(graph, source, destination);
-            break;
-        case 4:
-            InputSource(source);
-            InputDestination(destination);
-            // printGraph(graph, source, destination);
 
-            // addEdge(graph, 0, 1);
-            // addEdge(graph, 0, 4);
-            // addEdge(graph, 1, 2);
-            // addEdge(graph, 1, 3);
-            // addEdge(graph, 1, 4);
-            // addEdge(graph, 2, 3);
-            // addEdge(graph, 3, 4);
-            break;
+            addEdge(graph, 0, 1);
+            addEdge(graph, 0, 4);
+            addEdge(graph, 1, 2);
+            addEdge(graph, 1, 3);
+            addEdge(graph, 1, 4);
+            addEdge(graph, 2, 3);
+            addEdge(graph, 3, 4);
+        break;
+        case 4:
+            source=InputSource();
+            destination=InputDestination();
+            printGraph(graph, source, destination);
+        break;
   		case 5:
             printf("Exiting...\n");
-    	    break;
+    	break;
         default:
             printf("\nChoice Invalid.\n");
         break;
@@ -131,26 +130,34 @@ struct Graph* CreateGraph(int numVertices) {
     return graph;
 }
 
-char InputSource(char* str) {
+int InputSource() {
+	int data;
+
 	printf("Enter the source: ");
- 	scanf("%s", str);
+ 	scanf("%d", &data);
+
+	return data;
 }
 
-char InputDestination(char* str) {
+int InputDestination() {
+	int data;
+
 	printf("Enter the destination: ");
- 	scanf("%s", str);
+ 	scanf("%d", &data);
+
+	return data;
 }
 
 // Create a new node
-struct Node* CreateNode(char *dest) {
+struct Node* CreateNode(int dest) {
     struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
-    strcpy(dest, newNode->dest);
+    newNode->dest = dest;
     newNode->next = NULL;
     return newNode;
 }
 
 // Add an edge to the graph
-void addEdge(struct Graph* graph, char src, char dest) {
+void addEdge(struct Graph* graph, int src, int dest) {
     // Add an edge from source to destination
     struct Node* newNode = CreateNode(dest);
     newNode->next = graph->adjList[src];
@@ -165,16 +172,16 @@ void addEdge(struct Graph* graph, char src, char dest) {
 }
 
 // Print the graph
-void printGraph(struct Graph* graph, char *source, char *destination) {
+void printGraph(struct Graph* graph, int source, int destination) {
     int i, data=source;
 
 
-    printf("Shortest distance from %s to %s: ", source, destination);
-    printf("%s ", source);
-    while (strcmp(data, destination);) {
+    printf("Shortest distance from %d to %d: ", source, destination);
+    printf("%d ", source);
+    while (data!=destination) {
         struct Node* temp = graph->adjList[data];
-        printf("%s ", temp->dest);
-        strcpy(data, temp->dest);
+        printf("%d ", temp->dest);
+        data = temp->dest;
         temp = temp->next;
     }
     printf("\n");
