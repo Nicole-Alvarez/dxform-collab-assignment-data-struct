@@ -48,9 +48,9 @@ void addEdge(struct Graph* graph, int src, int dest) {
     // Uncomment the following lines if the graph is undirected
 
     // // Add an edge from destination to source
-    // newNode = createNode(src);
-    // newNode->next = graph->adjList[dest];
-    // graph->adjList[dest] = newNode;
+    newNode = createNode(src);
+    newNode->next = graph->adjList[dest];
+    graph->adjList[dest] = newNode;
 }
 
 // Print the graph
@@ -84,3 +84,10 @@ int main() {
 
     return 0;
 }
+
+// user input struct string: cityname
+// undirectional
+// assign name to node
+    // ask number of vertices
+    // loop input
+
