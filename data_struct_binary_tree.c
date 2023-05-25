@@ -270,7 +270,12 @@ void PrintResult(int status, int choice)
 
 void PrintHeight(int height)
 {
-    printf("Height of the binary tree: %d\n", height);
+    if(height==-1){
+        printf("Binary Tree is empty\n");
+    }else{
+        printf("Height of the binary tree: %d\n", height);
+    }
+    
 }
 
 void PrintNodes(struct Node *root) {
